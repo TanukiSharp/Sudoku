@@ -1,0 +1,238 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Sudoku.Controls"
+                    xmlns:viewModels="clr-namespace:Sudoku.ViewModels"
+                    xmlns:behaviors="clr-namespace:Sudoku.Behaviors"
+                    xmlns:valueConverters="clr-namespace:Sudoku.ValueConverters"
+                    xmlns:local="clr-namespace:Sudoku">
+
+    <SolidColorBrush x:Key="SuggestionsForegroundBrush" Color="RoyalBlue"/>
+    <SolidColorBrush x:Key="GivenValueForegroundBrush" Color="#A0A0A0"/>
+    <SolidColorBrush x:Key="UserValueForegroundBrush" Color="RoyalBlue"/>
+
+    <SolidColorBrush x:Key="LargeSeparatorBrush" Color="#A0A0A0"/>
+    <SolidColorBrush x:Key="ThinSeparatorBrush" Color="#D0D0D0"/>
+
+    <SolidColorBrush x:Key="WrongValueBrush" Color="#FFE2E6"/>
+
+    <Thickness x:Key="LargeSeparator">3</Thickness>
+    <GridLength x:Key="LargeGridLength">3</GridLength>
+    <GridLength x:Key="ThinGridLength">1</GridLength>
+
+    <valueConverters:InverseBooleanValueConverter x:Key="InverseBooleanValueConverter"/>
+
+    <DataTemplate x:Key="CellView" DataType="{x:Type viewModels:CellViewModel}">
+        <Border x:Name="value" Background="Transparent" behaviors:ClickToCommandBehavior.Command="{Binding ActionCommand, Mode=OneTime}">
+            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+
+                <ItemsControl x:Name="suggestions" ItemsSource="{Binding Suggestions, Mode=OneWay}" Focusable="False">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Viewbox>
+                                <TextBlock Text="{Binding}" Foreground="{StaticResource SuggestionsForegroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Viewbox>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="3" Columns="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+
+                <Viewbox x:Name="userValue" Stretch="Uniform" Visibility="Hidden">
+                    <TextBlock Text="{Binding UserValue, Mode=OneWay}" Foreground="{StaticResource UserValueForegroundBrush}"/>
+                </Viewbox>
+
+                <Viewbox x:Name="correctValue" Stretch="Uniform" Visibility="Hidden">
+                    <TextBlock Text="{Binding CorrectValue, Mode=OneWay}" Foreground="{StaticResource GivenValueForegroundBrush}"/>
+                </Viewbox>
+
+            </Grid>
+        </Border>
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding IsWrong, Mode=OneWay}" Value="True">
+                <Setter TargetName="value" Property="Background" Value="{StaticResource WrongValueBrush}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding IsSet, Mode=OneWay}" Value="True">
+                <Setter TargetName="suggestions" Property="Visibility" Value="Hidden"/>
+                <Setter TargetName="userValue" Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding IsLocked, Mode=OneWay}" Value="True">
+                <Setter TargetName="suggestions" Property="Visibility" Value="Hidden"/>
+                <Setter TargetName="userValue" Property="Visibility" Value="Hidden"/>
+                <Setter TargetName="correctValue" Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
+
+    <DataTemplate x:Key="SquareView" DataType="{x:Type viewModels:SquareViewModel}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="{StaticResource ThinGridLength}"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="{StaticResource ThinGridLength}"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="{StaticResource ThinGridLength}"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="{StaticResource ThinGridLength}"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Horizontal separators -->
+            <Rectangle Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="1" Width="Auto" Height="Auto" Fill="{StaticResource ThinSeparatorBrush}"/>
+            <Rectangle Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="3" Width="Auto" Height="Auto" Fill="{StaticResource ThinSeparatorBrush}"/>
+
+            <!-- Vertical separators -->
+            <Rectangle Grid.Column="1" Grid.Row="0" Grid.RowSpan="5" Width="Auto" Height="Auto" Fill="{StaticResource ThinSeparatorBrush}"/>
+            <Rectangle Grid.Column="3" Grid.Row="0" Grid.RowSpan="5" Width="Auto" Height="Auto" Fill="{StaticResource ThinSeparatorBrush}"/>
+
+            <ContentControl Grid.Column="0" Grid.Row="0" Content="{Binding Cell00, Mode=OneTime}" ContentTemplate="{StaticResource CellView}" Focusable="False"/>
+            <ContentControl Grid.Column="0" Grid.Row="2" Content="{Binding Cell01, Mode=OneTime}" ContentTemplate="{StaticResource CellView}" Focusable="False"/>
+            <ContentControl Grid.Column="0" Grid.Row="4" Content="{Binding Cell02, Mode=OneTime}" ContentTemplate="{StaticResource CellView}" Focusable="False"/>
+
+            <ContentControl Grid.Column="2" Grid.Row="0" Content="{Binding Cell10, Mode=OneTime}" ContentTemplate="{StaticResource CellView}" Focusable="False"/>
+            <ContentControl Grid.Column="2" Grid.Row="2" Content="{Binding Cell11, Mode=OneTime}" ContentTemplate="{StaticResource CellView}" Focusable="False"/>
+            <ContentControl Grid.Column="2" Grid.Row="4" Content="{Binding Cell12, Mode=OneTime}" ContentTemplate="{StaticResource CellView}" Focusable="False"/>
+
+            <ContentControl Grid.Column="4" Grid.Row="0" Content="{Binding Cell20, Mode=OneTime}" ContentTemplate="{StaticResource CellView}" Focusable="False"/>
+            <ContentControl Grid.Column="4" Grid.Row="2" Content="{Binding Cell21, Mode=OneTime}" ContentTemplate="{StaticResource CellView}" Focusable="False"/>
+            <ContentControl Grid.Column="4" Grid.Row="4" Content="{Binding Cell22, Mode=OneTime}" ContentTemplate="{StaticResource CellView}" Focusable="False"/>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="GridView" DataType="{x:Type viewModels:GridViewModel}">
+        <Border BorderBrush="{StaticResource LargeSeparatorBrush}" BorderThickness="{StaticResource LargeSeparator}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="{StaticResource LargeGridLength}"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="{StaticResource LargeGridLength}"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="{StaticResource LargeGridLength}"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="{StaticResource LargeGridLength}"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Horizontal separators -->
+                <Rectangle Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="1" Width="Auto" Height="Auto" Fill="{StaticResource LargeSeparatorBrush}"/>
+                <Rectangle Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="3" Width="Auto" Height="Auto" Fill="{StaticResource LargeSeparatorBrush}"/>
+
+                <!-- Vertical separators -->
+                <Rectangle Grid.Column="1" Grid.Row="0" Grid.RowSpan="5" Width="Auto" Height="Auto" Fill="{StaticResource LargeSeparatorBrush}"/>
+                <Rectangle Grid.Column="3" Grid.Row="0" Grid.RowSpan="5" Width="Auto" Height="Auto" Fill="{StaticResource LargeSeparatorBrush}"/>
+
+                <ContentControl Grid.Column="0" Grid.Row="0" Content="{Binding Square00, Mode=OneTime}" ContentTemplate="{StaticResource SquareView}" Focusable="False"/>
+                <ContentControl Grid.Column="0" Grid.Row="2" Content="{Binding Square01, Mode=OneTime}" ContentTemplate="{StaticResource SquareView}" Focusable="False"/>
+                <ContentControl Grid.Column="0" Grid.Row="5" Content="{Binding Square02, Mode=OneTime}" ContentTemplate="{StaticResource SquareView}" Focusable="False"/>
+
+                <ContentControl Grid.Column="2" Grid.Row="0" Content="{Binding Square10, Mode=OneTime}" ContentTemplate="{StaticResource SquareView}" Focusable="False"/>
+                <ContentControl Grid.Column="2" Grid.Row="2" Content="{Binding Square11, Mode=OneTime}" ContentTemplate="{StaticResource SquareView}" Focusable="False"/>
+                <ContentControl Grid.Column="2" Grid.Row="4" Content="{Binding Square12, Mode=OneTime}" ContentTemplate="{StaticResource SquareView}" Focusable="False"/>
+
+                <ContentControl Grid.Column="4" Grid.Row="0" Content="{Binding Square20, Mode=OneTime}" ContentTemplate="{StaticResource SquareView}" Focusable="False"/>
+                <ContentControl Grid.Column="4" Grid.Row="2" Content="{Binding Square21, Mode=OneTime}" ContentTemplate="{StaticResource SquareView}" Focusable="False"/>
+                <ContentControl Grid.Column="4" Grid.Row="4" Content="{Binding Square22, Mode=OneTime}" ContentTemplate="{StaticResource SquareView}" Focusable="False"/>
+            </Grid>
+        </Border>
+    </DataTemplate>
+
+    <DataTemplate x:Key="CompletelySetNumbersView">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
+            <TextBlock Text="Completely set:" Margin="2 2 8 2"/>
+            <ItemsControl ItemsSource="{Binding CompletelySetNumbers, Mode=OneTime}" Margin="2" Focusable="False">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock x:Name="number" Text="{Binding Number, Mode=OneTime}" VerticalAlignment="Stretch" MinWidth="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"/>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsCompletelySet, Mode=OneWay}" Value="False">
+                                <Setter TargetName="number" Property="Visibility" Value="Hidden"/>
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="9"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </StackPanel>
+    </DataTemplate>
+    
+    <DataTemplate x:Key="NumberView" DataType="{x:Type viewModels:NumberViewModel}">
+        <RadioButton
+            Style="{StaticResource {x:Type ToggleButton}}"
+            Command="{Binding Command, Mode=OneTime}"
+            VerticalAlignment="Stretch"
+            Margin="2"
+            FontSize="16"
+            IsChecked="{Binding IsSelected, Mode=OneWay}"
+            MinWidth="{Binding ActualHeight, RelativeSource={RelativeSource Self}}">
+            <Grid>
+                <!-- Dirty hack to avoid font weight switching from regular/bold to grow/shrink the control. -->
+                <TextBlock Text="{Binding Display, Mode=OneTime}" Margin="8" FontWeight="Bold" Visibility="Hidden"/>
+                <TextBlock x:Name="label" Text="{Binding Display, Mode=OneTime}" Margin="8"/>
+            </Grid>
+        </RadioButton>
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding IsSelected, Mode=OneWay}" Value="True">
+                <Setter TargetName="label" Property="FontWeight" Value="Bold"/>
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
+    
+    <DataTemplate x:Key="InGameToolbarView" DataType="{x:Type viewModels:ToolbarViewModel}">
+        <ItemsControl DockPanel.Dock="Top" VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="4" ItemsSource="{Binding Numbers, Mode=OneTime}" ItemTemplate="{StaticResource NumberView}" Focusable="False" IsEnabled="{Binding IsGameOver, Mode=OneWay, Converter={StaticResource InverseBooleanValueConverter}}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+    </DataTemplate>
+
+    <DataTemplate x:Key="NewGameToolbarView" DataType="{x:Type viewModels:ToolbarViewModel}">
+        <StackPanel Orientation="Vertical" VerticalAlignment="Bottom">
+            <TextBlock Text="Available values when generating:"/>
+            <StackPanel Orientation="Horizontal" Margin="2">
+                <TextBlock Text="Min:" VerticalAlignment="Center"/>
+                <Slider Minimum="1" Value="{Binding MinimumAvailableValues}" Margin="2" Padding="8" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="120" Focusable="False"/>
+                <TextBlock Text="{Binding MinimumAvailableValues}" VerticalAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="2">
+                <TextBlock Text="Max:" VerticalAlignment="Center"/>
+                <Slider Maximum="8" Value="{Binding MaximumAvailableValues}" Margin="2" Padding="8" HorizontalAlignment="Stretch" Width="120" Focusable="False"/>
+                <TextBlock Text="{Binding MaximumAvailableValues}" VerticalAlignment="Center"/>
+            </StackPanel>
+            <UniformGrid Rows="2" HorizontalAlignment="Left">
+                <Button Content="Generate" Command="{Binding GenerateCommand, Mode=OneTime}" Margin="2" Padding="20 8 20 8" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" FontSize="16"/>
+                <Button Content="Check" Command="{Binding CheckWrongValuesCommand, Mode=OneTime}" Margin="2" Padding="20 8 20 8" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" FontSize="16" IsEnabled="{Binding IsGameOver, Mode=OneWay, Converter={StaticResource InverseBooleanValueConverter}}"/>
+            </UniformGrid>
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="RootView" DataType="{x:Type viewModels:RootViewModel}">
+        <DockPanel LastChildFill="True">
+            <ContentControl DockPanel.Dock="Top" Content="{Binding Toolbar, Mode=OneTime}" ContentTemplate="{StaticResource InGameToolbarView}" Margin="8" Focusable="False"/>
+            <ContentControl DockPanel.Dock="Left" Content="{Binding Toolbar, Mode=OneTime}" ContentTemplate="{StaticResource NewGameToolbarView}" Margin="8" Focusable="False"/>
+
+            <DockPanel LastChildFill="True">
+                <ContentControl DockPanel.Dock="Bottom" Content="{Binding Grid, Mode=OneTime}" ContentTemplate="{StaticResource CompletelySetNumbersView}" Focusable="False"/>
+                <controls:CustomViewbox SnapsToDevicePixels="True" UseLayoutRounding="True">
+                    <ContentControl Content="{Binding Grid, Mode=OneTime}" ContentTemplate="{StaticResource GridView}" Margin="16" Focusable="False"/>
+                </controls:CustomViewbox>
+            </DockPanel>
+        </DockPanel>
+    </DataTemplate>
+
+</ResourceDictionary>
